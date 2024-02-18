@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dancing mosquitoes</title>
+    <meta name="description" content="Sunset with dancing mosquitoes" />
+    <link rel="canonical" href="https://dancing-mosquitoes.koenvangilst.nl/" />
+    <link rel="author" href="https://koenvangilst.nl" />
+    <meta name="theme-color" content="#0b405a" />
+    <meta name="creator" content="Koen van Gilst" />
+    <style>
+      html {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        background: linear-gradient(to bottom, #1c0c04 0%, #c54604 100%);
+      }
+
+      canvas {
+        margin-top: auto;
+        display: block;
+        border-radius: 50%;
+        overflow: hidden;
+        font-family: monospace;
+        width: min(70vh, 80%);
+        max-width: 600px;
+        background: linear-gradient(to bottom, #fff 0%, #fbf00d 100%);
+      }
+
+      #made {
+        text-align: center;
+        line-height: 1.5;
+        font-family: monospace;
+        margin-top: auto;
+        margin-bottom: 20px;
+        font-size: 10px;
+        color: white;
+      }
+
+      a {
+        color: white;
+        text-decoration: none;
+        border-bottom: 1px solid white;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="500" height="500"></canvas>
+
+    <p id="made">
+      made by <a href="https://koenvangilst.nl">Koen van Gilst</a> | source on
+      <a href="https://github.com/vnglst/dancing-mosquitoes">github</a>
+    </p>
+    <script>
+      const sunsetPalette = {
+        yellow: "#fbf00d",
+        fierySky: "#fba906",
+        burntOrange: "#de4604",
+        emberGlow: "#c54604",
+        smokyAsh: "#f77706",
+        deepNight: "#3f0c04",
+        charcoal: "#8f2404",
+        darkestIndico: "#1c0c04",
+        inkyBlack: "#300904",
+      };
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const flock = [];
+      const numBoids = 100;
+
+      class Boid {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.dx = 0;
+          this.dy = Math.random() - 0.5;
+          this.speed = 2;
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.moveTo(this.x, this.y);
+          ctx.lineTo(this.x - 2, this.y + 5);
+          ctx.lineTo(this.x + 2, this.y + 5);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        update() {
+          let alignment = this.align();
+          let cohesion = this.cohere();
+          let separation = this.separate();
+
+          let totalDx = alignment.dx + cohesion.dx + separation.dx;
+          let totalDy = alignment.dy + cohesion.dy + separation.dy;
+
+          // Add inertia to the movement
+          this.dx += totalDx * 0.01;
+          this.dy += totalDy * 0.01;
+
+          let speed = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
+          this.dx = (this.dx / speed) * this.speed;
+          this.dy = (this.dy / speed) * this.speed;
+
+          this.x += this.dx;
+          this.y += this.dy;
+
+          if (this.x < 0) this.x = canvas.width;
+          if (this.x > canvas.width) this.x = 0;
+          if (this.y < 0) this.y = canvas.height;
+          if (this.y > canvas.height) this.y = 0;
+        }
+
+        align() {
+          let dx = 0;
+          let dy = 0;
+          let count = 0;
+
+          for (let boid of flock) {
+            if (boid !== this && this.distanceTo(boid) < 50) {
+              dx += boid.dx;
+              dy += boid.dy;
+              count++;
+            }
+          }
+
+          if (count > 0) {
+            dx /= count;
+            dy /= count;
+          }
+
+          return { dx, dy };
+        }
+
+        cohere() {
+          let dx = 0;
+          let dy = 0;
+          let count = 0;
+
+          for (let boid of flock) {
+            if (boid !== this && this.distanceTo(boid) < 80) {
+              dx += boid.x;
+              dy += boid.y;
+              count++;
+            }
+          }
+
+          if (count > 0) {
+            dx = dx / count - this.x;
+            dy = dy / count - this.y;
+          }
+
+          return { dx, dy };
+        }
+
+        separate() {
+          let dx = 0;
+          let dy = 0;
+
+          for (let boid of flock) {
+            if (boid !== this && this.distanceTo(boid) < 30) {
+              dx -= boid.x - this.x;
+              dy -= boid.y - this.y;
+            }
+          }
+
+          return { dx, dy };
+        }
+
+        distanceTo(boid) {
+          let dx = boid.x - this.x;
+          let dy = boid.y - this.y;
+          return Math.sqrt(dx * dx + dy * dy);
+        }
+      }
+
+      for (let i = 0; i < numBoids; i++) {
+        flock.push(new Boid());
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let boid of flock) {
+          boid.update();
+          boid.draw();
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    </script>
+  </body>
+</html>
