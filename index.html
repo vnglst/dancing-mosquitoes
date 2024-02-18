@@ -203,6 +203,8 @@
         flock.push(new Boid());
       }
 
+      let intervalId = setInterval(animate, 1000 / 140);
+
       function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -210,11 +212,7 @@
           boid.update();
           boid.draw();
         }
-
-        requestAnimationFrame(animate);
       }
-
-      animate();
     </script>
   </body>
 </html>
