@@ -22,7 +22,14 @@
         justify-content: center;
         align-items: center;
         height: 100%;
-        background: linear-gradient(to bottom, #1c0c04 0%, #c54604 100%);
+
+        background: conic-gradient(
+          from 90deg at 50% 50%,
+          #300904 0deg,
+          #3f0c04 120deg,
+          #8f2404 240deg,
+          #300904 360deg
+        );
       }
 
       canvas {
@@ -33,7 +40,14 @@
         font-family: monospace;
         width: min(70vh, 80%);
         max-width: 600px;
-        background: linear-gradient(to bottom, #fff 0%, #fbf00d 100%);
+        filter: blur(1px) drop-shadow(0 0 20px rgba(0, 0, 0, 0.25));
+        background: conic-gradient(
+          from 0deg at -30% 30%,
+          #fbf00d 0deg,
+          #fba906 120deg,
+          #de4604 240deg,
+          #fbf00d 360deg
+        );
       }
 
       #made {
@@ -72,6 +86,7 @@
         darkestIndico: "#1c0c04",
         inkyBlack: "#300904",
       };
+
       const canvas = document.getElementById("canvas");
       const ctx = canvas.getContext("2d");
 
